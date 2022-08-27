@@ -9,26 +9,33 @@ const F1Field = require("ffjavascript").F1Field;
 exports.p = require("ffjavascript").Scalar.fromString("21888242871839275222246405745257275088548364400416034343698204186575808495617");
 const Fr = new F1Field(exports.p);
 
+const poseidonHash = async (items) => {
+    let poseidon = await buildPoseidon();
+    return poseidon.F.toObject(poseidon(items));
+};
+
 describe("MasterMind", function () {
     this.timeout(100000000);
 
-    const code = [1, 2, 3, 4, 5];
-    const salt = [25];
+    const code = [1, 2, 3];
+    const salt = 25;
     let input;
     let hash;
+
     beforeEach(async function () {
-
-        const poseidonJs = await buildPoseidon();
-
-        hash = ethers.BigNumber.from(poseidonJs.F.toObject(poseidonJs(salt.concat(code))))
+        hash = await poseidonHash([salt, ...code]);
 
         input = {
-            "pubGuess": ["0", "0", "0", "0", "0"],
-            "punNumberHits": "0",
-            "pubNumberBlows": "0",
-            "pubHash": hash,
-            "solution": code,
-            "salt": salt
+            privSolnA: code[0],
+            privSolnB: code[1],
+            privSolnC: code[2],
+            privSalt: salt,
+            pubGuessA: code[0],
+            pubGuessB: code[1],
+            pubGuessC: code[2],
+            pubNumHit: 3,
+            pubNumBlow: 0,
+            pubSolnHash: hash,
         }
     });
 
