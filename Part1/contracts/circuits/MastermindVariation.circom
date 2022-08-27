@@ -1,5 +1,9 @@
 pragma circom 2.0.0;
 
+include "../../node_modules/circomlib/circuits/comparators.circom";
+include "../../node_modules/circomlib/circuits/bitify.circom";
+include "../../node_modules/circomlib/circuits/poseidon.circom";
+
 // [assignment] implement a variation of mastermind from https://en.wikipedia.org/wiki/Mastermind_(board_game)#Variation as a circuit
 
 template MastermindVariation(n, m) {
@@ -8,13 +12,21 @@ template MastermindVariation(n, m) {
     signal input pubNumberBlows;
     signal input pubHash;
 
-    //private
+    // private
     signal input solution[n];
     signal input salt;
 
-    //Output
+    // Output
     signal output solutionHash;
 
+    component poseidon = Poseidon(n + 1);
+    poseidon.inputs[0] <== salt;
+    for (var i = 0; i < n; i++) {
+        poseidon.inputs[i + 1] <== solution[i];
+    }
+
+    solutionHash <== poseidon.out;
+    pubHash === solutionHash;
 }
 
 component main { public [pubGuess, punNumberHits, pubNumberBlows, pubHash] } = MastermindVariation(5, 10);
