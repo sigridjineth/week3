@@ -35,6 +35,8 @@ describe("MasterMind", function () {
     it("should validate hash of circuit", async function () {
         const circuit = await wasm_tester("contracts/circuits/MastermindVariation.circom");
         const witness = await circuit.calculateWitness(input, true);
+        console.log("witness", witness)
+
         assert(Fr.eq(Fr.e(witness[0]), Fr.e(1)));
         assert(Fr.eq(Fr.e(witness[1]), Fr.e(hash)));
     });
