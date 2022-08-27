@@ -3,9 +3,9 @@ import * as crypto from 'crypto';
 import * as ethers from 'ethers';
 import {buildBabyjub, buildEddsa, buildMimc7} from 'circomlibjs';
 
-const createBlakeHash = require('blake-hash');
+import ff from "ffjavascript";
 
-const ff = require('ffjavascript');
+const createBlakeHash = require('blake-hash');
 
 type PrivKey = bigint;
 type PubKey = Uint8Array[];

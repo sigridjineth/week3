@@ -37,6 +37,8 @@ describe('ECDH test', () => {
       pubKey: alicePubKey,
     });
     const decryptedMessage = await decrypt(ciphertext, ecdhbobSharedKey);
+
+    console.log("MESSAGE", decryptedMessage, aliceMessage);
     expect(decryptedMessage).toStrictEqual(aliceMessage);
   });
 

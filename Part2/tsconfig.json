@@ -9,6 +9,9 @@
     "noImplicitAny": false,
     "declaration": true,
     "moduleResolution": "node",
+    "lib": [
+      "es2020", "esnext"
+    ],
     "module": "es2020",
     "target": "esnext"
   },

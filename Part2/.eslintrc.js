@@ -1,4 +1,4 @@
-module.exorts = {
+module.exports = {
   root: true,
   env: {
     node: true,
@@ -16,5 +16,6 @@ module.exorts = {
     'no-console': 0,
     semi: 0,
     '@typescript-eslint/no-explicit-any': 0,
+    '@typescript-eslint/no-var-requires': 0,
   },
 };
