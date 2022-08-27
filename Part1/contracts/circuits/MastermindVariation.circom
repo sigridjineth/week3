@@ -25,7 +25,7 @@ template MastermindVariation() {
     signal output solnHashOut;
 
     var guess[3] = [pubGuessA, pubGuessB, pubGuessC];
-    var soln[3] =  [privSolnA, privSolnB, privSolnC];
+    var soln[3] = [privSolnA, privSolnB, privSolnC];
     var j = 0;
     var k = 0;
 
@@ -58,6 +58,27 @@ template MastermindVariation() {
             equalSoln[equalIdx].in[1] <== soln[k];
             equalSoln[equalIdx].out === 0;
             equalIdx += 1;
+        }
+    }
+
+    // Count hit and blow
+    var hit = 0;
+    var blow = 0;
+    component equalHitOrBlow[9]; // total cases are 3 * 3
+
+    for (j = 0; j < 3; j++) {
+        for (k = 0; k < 3; k++) {
+            equalHitOrBlow[3 * j + k] = IsEqual();
+            equalHitOrBlow[3 * j + k].in[0] <== guess[j];
+            equalHitOrBlow[3 * j + k].in[1] <== soln[k];
+
+            // if equal 1 else 0
+            blow += equalHitOrBlow[3 * j + k].out;
+        }
+
+        if (j == k) {
+            hit += equalHitOrBlow[3 * j + k].out;
+            blow -= equalHitOrBlow[3 * j + k].out;
         }
     }
 

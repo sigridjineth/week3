@@ -66,4 +66,29 @@ describe("MasterMind", function () {
             expect(error).to.be.instanceOf(Error);
         }
     })
+
+    it("SCENARIO 1: 3 HITS WITH 0 BLOW", async() => {
+        // given
+        const circuit = await wasm_tester("contracts/circuits/MastermindVariation.circom");
+        const code = [1, 2, 3];
+        const hash = await poseidonHash([salt, ...code]);
+
+        // when
+        input = {
+            ...input,
+            privSolnA: code[0],
+            privSolnB: code[1],
+            privSolnC: code[2],
+            pubNumHit: 3,
+            pubNumBlow: 0,
+            pubSolnHash: hash,
+        }
+
+        const witness = await circuit.calculateWitness(input, true);
+        console.log("witness", witness)
+
+        // then
+        assert(Fr.eq(Fr.e(witness[0]), Fr.e(1)));
+        assert(Fr.eq(Fr.e(witness[1]), Fr.e(hash)));
+    })
 });
