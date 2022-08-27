@@ -39,25 +39,23 @@ describe("MasterMind", function () {
         }
     });
 
-    it("should validate hash of circuit", async function () {
+    it("FAIL SCENARIO 1: should not have larger number than integer 10 for both pubGuess and Solution", async() => {
         // given
         const circuit = await wasm_tester("contracts/circuits/MastermindVariation.circom");
 
         // when
-        const witness = await circuit.calculateWitness(input, true);
-        console.log("witness", witness)
-
-        // then
-        assert(Fr.eq(Fr.e(witness[0]), Fr.e(1)));
-        assert(Fr.eq(Fr.e(witness[1]), Fr.e(hash)));
-    });
-
-    it("should not have larger number than integer 10 for both pubGuess and Solution", async() => {
-        // given
-        const circuit = await wasm_tester("contracts/circuits/MastermindVariation.circom");
-
-        // when
-        input.pubGuess = ["11", "11", "11", "11", "11"];
+        input = {
+            ...input,
+            privSolnA: 11,
+            privSolnB: 12,
+            privSolnC: 13,
+            pubGuessA: 11,
+            pubGuessB: 12,
+            pubGuessC: 13,
+            pubNumHit: 2,
+            pubNumBlow: 0,
+            pubSolnHash: hash,
+        }
 
         // then
         try {
@@ -67,7 +65,7 @@ describe("MasterMind", function () {
         }
     })
 
-    it("SCENARIO 1: 3 HITS WITH 0 BLOW", async() => {
+    it("FAIL SCENARIO 2: should fail if there is duplicate number", async() => {
         // given
         const circuit = await wasm_tester("contracts/circuits/MastermindVariation.circom");
         const code = [1, 2, 3];
@@ -79,8 +77,123 @@ describe("MasterMind", function () {
             privSolnA: code[0],
             privSolnB: code[1],
             privSolnC: code[2],
+            pubGuessA: 6,
+            pubGuessB: 6,
+            pubGuessC: 6,
+            pubNumHit: 2,
+            pubNumBlow: 0,
+            pubSolnHash: hash,
+        }
+
+        // then
+        try {
+            await circuit.calculateWitness(input, true);
+        } catch (error) {
+            expect(error).to.be.instanceOf(Error);
+        }
+    })
+
+    it("FAIL SCENARIO 3: 1 HITS WITH 1 BLOW BUT 2 HITS 2 BLOW", async() => {
+        // given
+        const circuit = await wasm_tester("contracts/circuits/MastermindVariation.circom");
+        const code = [1, 2, 3];
+        const hash = await poseidonHash([salt, ...code]);
+
+        // when
+        input = {
+            ...input,
+            privSolnA: code[0],
+            privSolnB: code[1],
+            privSolnC: code[2],
+            pubGuessA: code[0],
+            pubGuessB: 4,
+            pubGuessC: code[1],
+            pubNumHit: 2,
+            pubNumBlow: 2,
+            pubSolnHash: hash,
+        }
+
+        // then
+        try {
+            await circuit.calculateWitness(input, true);
+        } catch (error) {
+            expect(error).to.be.instanceOf(Error);
+        }
+    })
+
+    it("PASS SCENARIO 1: 3 HITS WITH 0 BLOW", async() => {
+        // given
+        const circuit = await wasm_tester("contracts/circuits/MastermindVariation.circom");
+        const code = [1, 2, 3];
+        const hash = await poseidonHash([salt, ...code]);
+
+        // when
+        const input = {
+            privSolnA: code[0],
+            privSolnB: code[1],
+            privSolnC: code[2],
+            privSalt: salt,
+            pubGuessA: code[0],
+            pubGuessB: code[1],
+            pubGuessC: code[2],
             pubNumHit: 3,
             pubNumBlow: 0,
+            pubSolnHash: hash,
+        }
+
+        const witness = await circuit.calculateWitness(input, true);
+        console.log("witness", witness)
+
+        // then
+        assert(Fr.eq(Fr.e(witness[0]), Fr.e(1)));
+        assert(Fr.eq(Fr.e(witness[1]), Fr.e(hash)));
+    })
+
+    it("PASS SCENARIO 2: 2 HITS WITH 0 BLOW", async() => {
+        // given
+        const circuit = await wasm_tester("contracts/circuits/MastermindVariation.circom");
+        const code = [1, 2, 3];
+        const hash = await poseidonHash([salt, ...code]);
+
+        // when
+        input = {
+            ...input,
+            privSolnA: code[0],
+            privSolnB: code[1],
+            privSolnC: code[2],
+            pubGuessA: code[0],
+            pubGuessB: code[1],
+            pubGuessC: 4,
+            pubNumHit: 2,
+            pubNumBlow: 0,
+            pubSolnHash: hash,
+        }
+
+        const witness = await circuit.calculateWitness(input, true);
+        console.log("witness", witness)
+
+        // then
+        assert(Fr.eq(Fr.e(witness[0]), Fr.e(1)));
+        assert(Fr.eq(Fr.e(witness[1]), Fr.e(hash)));
+    })
+
+    it("PASS SCENARIO 3: 1 HITS WITH 1 BLOW", async() => {
+        // given
+        const circuit = await wasm_tester("contracts/circuits/MastermindVariation.circom");
+        const code = [1, 2, 3];
+        const hash = await poseidonHash([salt, ...code]);
+
+        // when
+        input = {
+            ...input,
+            privSolnA: code[0],
+            privSolnB: code[1],
+            privSolnC: code[2],
+            pubGuessA: code[0],
+            pubGuessB: 4,
+            pubGuessC: code[1],
+            pubNumHit: 1,
+            pubNumBlow: 1,
             pubSolnHash: hash,
         }
 

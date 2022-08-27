@@ -61,26 +61,35 @@ template MastermindVariation() {
         }
     }
 
-    // Count hit and blow
+    // Count hit & blow
     var hit = 0;
     var blow = 0;
-    component equalHitOrBlow[9]; // total cases are 3 * 3
+    component equalHB[9];
 
-    for (j = 0; j < 3; j++) {
-        for (k = 0; k < 3; k++) {
-            equalHitOrBlow[3 * j + k] = IsEqual();
-            equalHitOrBlow[3 * j + k].in[0] <== guess[j];
-            equalHitOrBlow[3 * j + k].in[1] <== soln[k];
-
-            // if equal 1 else 0
-            blow += equalHitOrBlow[3 * j + k].out;
-        }
-
-        if (j == k) {
-            hit += equalHitOrBlow[3 * j + k].out;
-            blow -= equalHitOrBlow[3 * j + k].out;
-        }
+    for (j=0; j<3; j++) {
+         for (k=0; k<3; k++) {
+            equalHB[3*j+k] = IsEqual();
+            equalHB[3*j+k].in[0] <== soln[j];
+            equalHB[3*j+k].in[1] <== guess[k];
+            blow += equalHB[3*j+k].out;
+            if (j == k) {
+                hit += equalHB[3*j+k].out;
+                blow -= equalHB[3*j+k].out;
+          }
+       }
     }
+
+    // Create a constraint around the number of hit
+    component equalHit = IsEqual();
+    equalHit.in[0] <== pubNumHit;
+    equalHit.in[1] <== hit;
+    equalHit.out === 1;
+
+    // Create a constraint around the number of blow
+    component equalBlow = IsEqual();
+    equalBlow.in[0] <== pubNumBlow;
+    equalBlow.in[1] <== blow;
+    equalBlow.out === 1;
 
     // Verify that the hash of the private solution matches pubSolnHash
     component poseidon = Poseidon(4);
