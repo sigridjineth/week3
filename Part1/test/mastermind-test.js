@@ -33,11 +33,30 @@ describe("MasterMind", function () {
     });
 
     it("should validate hash of circuit", async function () {
+        // given
         const circuit = await wasm_tester("contracts/circuits/MastermindVariation.circom");
+
+        // when
         const witness = await circuit.calculateWitness(input, true);
         console.log("witness", witness)
 
+        // then
         assert(Fr.eq(Fr.e(witness[0]), Fr.e(1)));
         assert(Fr.eq(Fr.e(witness[1]), Fr.e(hash)));
     });
+
+    it("should not have larger number than integer 10 for both pubGuess and Solution", async() => {
+        // given
+        const circuit = await wasm_tester("contracts/circuits/MastermindVariation.circom");
+
+        // when
+        input.pubGuess = ["11", "11", "11", "11", "11"];
+
+        // then
+        try {
+            await circuit.calculateWitness(input, true);
+        } catch (error) {
+            expect(error).to.be.instanceOf(Error);
+        }
+    })
 });

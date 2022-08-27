@@ -19,6 +19,20 @@ template MastermindVariation(n, m) {
     // Output
     signal output solutionHash;
 
+    component lessThan[2*n];
+
+    for (var i = 0; i < n; i++) {
+        lessThan[i] = LessThan(5);
+        lessThan[i].in[0] <== pubGuess[i];
+        lessThan[i].in[1] <== m;
+        lessThan[i].out === 1;
+
+        lessThan[i+n] = LessThan(5);
+        lessThan[i+n].in[0] <== solution[i];
+        lessThan[i+n].in[1] <== m;
+        lessThan[i+n].out === 1;
+    }
+
     component poseidon = Poseidon(n + 1);
     poseidon.inputs[0] <== salt;
     for (var i = 0; i < n; i++) {
